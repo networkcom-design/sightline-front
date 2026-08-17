@@ -1,0 +1,1086 @@
+:root {
+  --ground: #f0f3f3;
+  --surface: #ffffff;
+  --surface-2: #e7eded;
+  --ink: #0f1f1e;
+  --muted: #5c7071;
+  --faint: #8a9c9c;
+  --border: #d3dcdc;
+  --border-soft: #e4eaea;
+  --accent: #1b5a61;
+  --accent-2: #2b818b;
+  --accent-soft: #e0edee;
+  --violeta: #5b4b8a;
+  --violeta-soft: #eae6f4;
+  --critico: #a93a31;
+  --basico: #a9761a;
+  --competitivo: #3b7c68;
+  --referente: #1c6a53;
+  --critico-soft: #f6e4e2;
+  --basico-soft: #f7ecd8;
+  --competitivo-soft: #e1efea;
+
+  /* Par de estado validado para modo claro: separación 25 sobre 100 en visión
+     normal y 6,2 en deuteranopía, aceptable porque el texto siempre acompaña. */
+  --estado-problema: #b3352b;
+  --estado-bien: #17794f;
+  --estado-medio: #a9761a;
+
+  /* Rampa secuencial de un solo tono para magnitud. Cuatro pasos de claro a
+     oscuro: cuanto más alto el puntaje, más saturado el tono. */
+  --rampa-1: #cfe3e5;
+  --rampa-2: #93c3c8;
+  --rampa-3: #4f939c;
+  --rampa-4: #1b5a61;
+
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  --r: 10px;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0c1414;
+    --surface: #131f1f;
+    --surface-2: #1a2827;
+    --ink: #e4eceb;
+    --muted: #8da1a1;
+    --faint: #6b7e7e;
+    --border: #253635;
+    --border-soft: #1d2c2b;
+    --accent: #4fa5ae;
+    --accent-2: #6fc2cb;
+    --accent-soft: #16302f;
+    --violeta: #a99bd6;
+    --violeta-soft: #221d33;
+    --critico: #e08078;
+    --basico: #dcaa4e;
+    --competitivo: #6bb79e;
+    --referente: #55b392;
+    --critico-soft: #2c1a19;
+    --basico-soft: #2b2416;
+    --competitivo-soft: #162b26;
+
+    /* El par de estado del modo oscuro es propio, no una versión aclarada del
+       claro: con esos tonos la separación caía a 4,1 para deuteranopía. Estos
+       dan 11,3, verificados contra la superficie oscura. */
+    --estado-problema: #d9663f;
+    --estado-bien: #33a894;
+    --estado-medio: #dcaa4e;
+
+    /* La rampa oscura va al revés en luminosidad: sobre fondo oscuro, más
+       puntaje es más claro. No es la clara invertida, son pasos propios. */
+    --rampa-1: #1f3b3d;
+    --rampa-2: #2f6067;
+    --rampa-3: #3f8f99;
+    --rampa-4: #6fc2cb;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+/* ---- Estructura ---- */
+
+.marco-app {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.lateral {
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+
+  /* La barra queda fija mientras el contenido scrollea.
+     Los informes son largos, y sin esto el menú y el botón de salir se van
+     para arriba: para cambiar de auditoría había que volver hasta el tope. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 8px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+}
+
+.menu {
+  display: grid;
+  gap: 2px;
+}
+
+.menu a {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 7px;
+}
+
+.menu a:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.menu a.activo {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.pie-lateral {
+  margin-top: auto;
+  border-top: 1px solid var(--border-soft);
+  padding: 14px 10px 0;
+  font-size: 12.5px;
+  color: var(--faint);
+  display: grid;
+  gap: 8px;
+}
+
+.contenido {
+  padding: 28px 32px 72px;
+  max-width: 1040px;
+  min-width: 0;
+}
+
+.centrado {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* ---- Cabeceras ---- */
+
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+h1 {
+  font-size: 25px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.sub {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+/* ---- Tarjetas ---- */
+
+.tarjeta {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.tile {
+  background: var(--surface-2);
+  border-radius: var(--r);
+  padding: 13px 15px;
+}
+
+.tile-l {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.tile-v {
+  font-family: var(--mono);
+  font-size: 23px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Controles ---- */
+
+.boton {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.boton:hover:not(:disabled) {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.boton.fantasma {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border);
+  font-weight: 400;
+}
+
+.boton.fantasma:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--faint);
+}
+
+.boton.peligro {
+  background: transparent;
+  border-color: var(--critico);
+  color: var(--critico);
+}
+
+.boton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.acciones {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.campo {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 13px;
+}
+
+.campo label {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 14px;
+}
+
+.ayuda {
+  font-size: 12.5px;
+  color: var(--faint);
+  margin: 4px 0 0;
+}
+
+/* ---- Avisos ---- */
+
+.aviso {
+  border-radius: var(--r);
+  padding: 12px 15px;
+  font-size: 13.5px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.aviso.error {
+  border-color: var(--critico);
+  background: var(--critico-soft);
+  color: var(--critico);
+}
+
+.aviso.atencion {
+  border-color: var(--basico);
+  background: var(--basico-soft);
+  color: var(--basico);
+}
+
+/* ---- Etiquetas ---- */
+
+.chip {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 2px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.chip.critico {
+  background: var(--critico-soft);
+  color: var(--critico);
+}
+.chip.basico {
+  background: var(--basico-soft);
+  color: var(--basico);
+}
+.chip.competitivo {
+  background: var(--competitivo-soft);
+  color: var(--competitivo);
+}
+.chip.referente {
+  background: var(--competitivo-soft);
+  color: var(--referente);
+}
+.chip.neutro {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.chip.ia {
+  background: var(--violeta-soft);
+  color: var(--violeta);
+}
+.chip.medido {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---- Tablas ---- */
+
+.tabla-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  font-weight: 500;
+  padding: 0 10px 8px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.fila-clic {
+  cursor: pointer;
+}
+
+.fila-clic:hover td {
+  background: var(--surface-2);
+}
+
+/* ---- Puntaje ---- */
+
+.puntaje-bloque {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 24px;
+  align-items: center;
+}
+
+.puntaje-grande {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.puntaje-grande b {
+  font-family: var(--mono);
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.medidor {
+  display: grid;
+  gap: 7px;
+}
+
+.bandas {
+  display: grid;
+  grid-template-columns: 40fr 20fr 20fr 21fr;
+  gap: 2px;
+  height: 9px;
+}
+
+.bandas i {
+  display: block;
+  border-radius: 2px;
+}
+
+.b1 {
+  background: var(--critico);
+}
+.b2 {
+  background: var(--basico);
+}
+.b3 {
+  background: var(--competitivo);
+}
+.b4 {
+  background: var(--referente);
+}
+
+.aguja {
+  position: relative;
+  height: 13px;
+}
+
+.aguja span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.aguja span::before {
+  content: '';
+  display: block;
+  width: 2px;
+  height: 7px;
+  background: currentColor;
+  margin: 0 auto 2px;
+  border-radius: 1px;
+}
+
+.escala {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+/* ---- Dimensiones ---- */
+
+.dims {
+  display: grid;
+  gap: 10px;
+}
+
+.dim {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 50px;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.dim-n {
+  color: var(--muted);
+}
+
+.dim-n small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+}
+
+.pista {
+  height: 7px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.lleno {
+  height: 7px;
+  border-radius: 4px;
+  background: var(--accent);
+}
+
+.dim-v {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Señales ---- */
+
+.grupo {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.grupo.urgente {
+  border-color: var(--basico);
+}
+
+.grupo-cabeza {
+  background: var(--surface-2);
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.grupo.urgente .grupo-cabeza {
+  background: var(--basico-soft);
+  color: var(--basico);
+}
+
+.grupo-cabeza span {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.fila-senal {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 11px 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.fila-texto {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.fila-pregunta {
+  font-size: 13.5px;
+}
+
+.fila-fundamento {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 7px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.fila-fundamento q {
+  font-style: italic;
+}
+
+.tri {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  flex: none;
+}
+
+.tri button {
+  font: inherit;
+  font-size: 11.5px;
+  padding: 5px 10px;
+  color: var(--muted);
+  border: none;
+  border-right: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tri button:last-child {
+  border-right: none;
+}
+
+.tri button:hover:not(.on) {
+  background: var(--surface-2);
+}
+
+.tri button.on.si {
+  background: var(--competitivo);
+  color: #fff;
+}
+.tri button.on.no {
+  background: var(--critico);
+  color: #fff;
+}
+.tri button.on.na {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+/* ---- Barra de cobertura ---- */
+
+.barra-triple {
+  display: flex;
+  height: 7px;
+  border-radius: 4px;
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 7px;
+}
+
+.barra-triple i {
+  display: block;
+}
+
+/* ---- Servicios ---- */
+
+.servicio {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r);
+  padding: 13px 15px;
+  margin-bottom: 9px;
+}
+
+.servicio h3 {
+  font-size: 14px;
+}
+
+.servicio p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.precio {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.precio small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--faint);
+  font-family: var(--sans);
+}
+
+.salto-puntaje {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-2);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.salto-puntaje b {
+  font-family: var(--mono);
+  font-size: 29px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.salto-puntaje .destino {
+  color: var(--referente);
+}
+
+.salto-puntaje p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1;
+  min-width: 170px;
+}
+
+/* ---- Vista pública ---- */
+
+.documento {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  font-family: var(--serif);
+}
+
+.documento .de {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.documento h1 {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+  margin: 6px 0 2px;
+}
+
+.documento .meta {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--muted);
+  margin: 0 0 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.documento p.parrafo {
+  font-size: 16.5px;
+  line-height: 1.65;
+  max-width: 64ch;
+}
+
+.documento ol {
+  padding-left: 22px;
+  display: grid;
+  gap: 11px;
+  font-size: 15.5px;
+  max-width: 64ch;
+}
+
+.cierre-doc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  font-family: var(--sans);
+  margin-top: 28px;
+}
+
+.cierre-doc h2 {
+  margin-bottom: 8px;
+}
+
+.cierre-doc p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 58ch;
+}
+
+/* ---- Varios ---- */
+
+.cargando {
+  color: var(--muted);
+  font-size: 14px;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.vacio {
+  text-align: center;
+  color: var(--muted);
+  padding: 44px 20px;
+}
+
+.pasos {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  font-size: 12.5px;
+}
+
+.paso {
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--faint);
+}
+
+.paso.actual {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.paso.hecho {
+  border-color: var(--competitivo);
+  color: var(--competitivo);
+}
+
+/* ---- Estado, par validado ----
+   Rojo y verde solo se usan para este juicio binario, nunca para distinguir
+   categorías: la escala de cuatro niveles usa una rampa de un solo tono porque
+   rojo-amarillo-verde no se distingue con daltonismo. Los tonos del modo oscuro
+   son otros, elegidos y verificados aparte, no una versión aclarada de estos. */
+
+.punto-impacto {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: var(--estado-problema);
+}
+
+.punto-impacto.basico {
+  background: var(--estado-medio);
+}
+
+.punto-impacto.neutro {
+  background: var(--faint);
+}
+
+/* ---- Impresión ---- */
+
+.solo-impresion {
+  display: none;
+}
+
+@media print {
+  /*
+   * Se fuerza la paleta clara pase lo que pase.
+   *
+   * Si el usuario tiene el sistema en modo oscuro, sin esto el PDF sale con
+   * fondo negro: ilegible impreso y un desperdicio de tinta. La impresión es
+   * siempre sobre papel blanco, así que el tema del sistema no aplica.
+   */
+  :root {
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f2f5f5;
+    --ink: #101d1c;
+    --muted: #4a5c5d;
+    --faint: #6f8081;
+    --border: #c9d4d4;
+    --border-soft: #e0e7e7;
+    --accent: #14484e;
+    --accent-soft: #e6f0f1;
+    --violeta: #4a3d73;
+    --violeta-soft: #eeeaf7;
+    --critico: #8f2f27;
+    --basico: #8a5f13;
+    --competitivo: #2e6553;
+    --referente: #175642;
+    --critico-soft: #f7e6e4;
+    --basico-soft: #f9efdc;
+    --competitivo-soft: #e4f0ec;
+  }
+
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  body {
+    background: #fff;
+    font-size: 11.5pt;
+  }
+
+  /* Los colores de los medidores y las etiquetas son información, no adorno:
+     sin esto el navegador los descarta al imprimir y el informe pierde
+     justamente lo que se lee de un vistazo. */
+  .bandas i,
+  .lleno,
+  .chip,
+  .barra-triple i,
+  .tile {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .lateral,
+  .acciones,
+  .pasos,
+  .boton,
+  .tri,
+  .aviso.atencion {
+    display: none !important;
+  }
+
+  .solo-pantalla {
+    display: none !important;
+  }
+
+  .solo-impresion {
+    display: block;
+  }
+
+  .marco-app {
+    display: block;
+  }
+
+  .contenido,
+  .documento {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tarjeta,
+  .cierre-doc,
+  .grupo {
+    border: 1px solid var(--border);
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .servicio,
+  .dim,
+  .fila-senal,
+  .puntaje-bloque,
+  .salto-puntaje {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  table {
+    break-inside: auto;
+  }
+
+  tr {
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .pie-impresion {
+    margin-top: 26px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-family: var(--sans);
+    font-size: 9.5pt;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 800px) {
+  .marco-app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lateral {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+
+    /* En celular la barra pasa arriba y en horizontal: fijarla se comería
+       media pantalla, que es justo lo que no sobra en un teléfono. */
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .pie-lateral {
+    margin-top: 0;
+  }
+  .contenido {
+    padding: 20px 16px 60px;
+  }
+  .dim {
+    grid-template-columns: 110px minmax(0, 1fr) 44px;
+  }
+  .fila-senal {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,28 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Vite 8 necesita Node 20 o superior.
+  NODE_VERSION = "22"
+
+# La aplicacion tiene rutas propias: /auditorias/{id}, /informe/{token}.
+# Sin esta regla, entrar directo a un enlace de informe da 404, porque el
+# servidor busca un archivo que no existe en lugar de dejar que el router
+# del navegador resuelva la ruta. Es justo el caso del enlace que se le
+# manda al cliente, asi que sin esto se rompe lo mas importante.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
