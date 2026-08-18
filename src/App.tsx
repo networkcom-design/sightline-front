@@ -35,7 +35,7 @@ function Privado() {
       <aside className="lateral">
         <div className="logo">
           <Logo tamano={20} />
-          <span>Lupa</span>
+          <span>Sightline</span>
         </div>
 
         <nav className="menu">

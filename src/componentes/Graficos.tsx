@@ -1,7 +1,7 @@
 import type { PuntajePorDimension } from '../api/tipos';
 
 /**
- * Gráficos de Lupa, dibujados a mano en SVG.
+ * Gráficos de Sightline, dibujados a mano en SVG.
  *
  * Sin librería de charts a propósito: son tres formas simples, el SVG imprime
  * nítido en el PDF —que es donde el comerciante lo va a mirar— y no suma 200 kB

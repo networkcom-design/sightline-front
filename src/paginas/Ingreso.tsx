@@ -36,11 +36,13 @@ export function Ingreso() {
       <form className="tarjeta" style={{ width: '100%', maxWidth: 380 }} onSubmit={enviar}>
         <div style={{ display: 'flex', gap: 9, justifyContent: 'center', marginBottom: 18 }}>
           <Logo tamano={22} />
-          <strong style={{ fontWeight: 500, fontSize: 18 }}>Lupa</strong>
+          <strong style={{ fontWeight: 500, fontSize: 18, letterSpacing: '-0.01em' }}>
+            Sightline
+          </strong>
         </div>
 
         <p className="sub" style={{ textAlign: 'center', marginBottom: 20 }}>
-          Auditoría de presencia digital para comercios
+          Auditoría de presencia digital
         </p>
 
         {error && <div className="aviso error">{error}</div>}

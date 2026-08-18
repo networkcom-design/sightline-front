@@ -69,7 +69,7 @@ async function pedir<T>(ruta: string, opciones: Opciones = {}): Promise<T> {
   } catch {
     // Distinguir "no llegué al servidor" de "el servidor dijo que no" importa:
     // el primero se resuelve prendiendo el backend, el segundo no.
-    throw new ErrorApi(0, 'No se pudo conectar con el servidor de Lupa.');
+    throw new ErrorApi(0, 'No se pudo conectar con el servidor de Sightline.');
   }
 
   if (respuesta.status === 204) {

@@ -9,7 +9,7 @@ import { ChipNivel, Logo, Medidor } from '../componentes/Piezas';
 /**
  * El informe que ve el prospecto.
  *
- * Cambia el registro tipográfico a propósito: adentro de Lupa es una
+ * Cambia el registro tipográfico a propósito: adentro de Sightline es una
  * herramienta, acá es un documento. Y no muestra horas, precios por servicio ni
  * de dónde salió cada dictamen: esos campos no llegan siquiera desde la API.
  */

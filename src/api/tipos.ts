@@ -1,5 +1,5 @@
 /**
- * Los tipos que devuelve la API de Lupa.
+ * Los tipos que devuelve la API de Sightline.
  *
  * Están escritos a mano y espejan los records del backend. Si alguna vez el
  * contrato crece mucho, conviene generarlos desde OpenAPI; para siete endpoints,

@@ -1,10 +1,21 @@
 import type { Nivel, PuntajePorDimension } from '../api/tipos';
 
+/**
+ * Una mira: el círculo y las dos líneas que lo cruzan.
+ *
+ * Tres trazos y nada más, porque se usa a 15 y a 20 píxeles y a ese tamaño
+ * cualquier detalle se convierte en una mancha. Además de aludir al nombre,
+ * dice lo que hace la herramienta: apuntar a algo y medirlo.
+ */
 export function Logo({ tamano = 20 }: { tamano?: number }) {
   return (
     <svg width={tamano} height={tamano} viewBox="0 0 22 22" fill="none" aria-hidden="true">
-      <circle cx="9.5" cy="9.5" r="6.5" stroke="var(--accent)" strokeWidth="1.8" />
-      <path d="M14.5 14.5 L19 19" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="11" cy="11" r="6.6" stroke="var(--accent)" strokeWidth="1.8" />
+      <path d="M11 1.4 V5.2" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M11 16.8 V20.6" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M1.4 11 H5.2" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M16.8 11 H20.6" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="11" cy="11" r="1.7" fill="var(--accent)" />
     </svg>
   );
 }

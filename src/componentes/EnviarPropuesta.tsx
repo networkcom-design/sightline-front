@@ -12,7 +12,7 @@ interface Props {
 /**
  * Arma el mensaje y abre WhatsApp o el correo con todo cargado.
  *
- * Lupa no manda nada por su cuenta a propósito. Mandar mensajes en nombre de
+ * Sightline no manda nada por su cuenta a propósito. Mandar mensajes en nombre de
  * alguien exige la API de WhatsApp Business, aprobación de Meta y plantillas
  * preaprobadas, o un servidor de correo con dominio verificado. Nada de eso
  * hace falta para el problema real: el auditor abre la conversación con el
