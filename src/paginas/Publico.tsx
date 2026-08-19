@@ -115,6 +115,65 @@ export function Publico() {
         </div>
       )}
 
+      {vista.avance && (
+        <div style={{ fontFamily: 'var(--sans)', margin: '30px 0' }}>
+          <h2>En qué anda el trabajo</h2>
+          <p className="sub" style={{ marginBottom: 14, maxWidth: '58ch' }}>
+            {vista.avance.avance === 100
+              ? 'Está todo entregado.'
+              : `${vista.avance.avance}% del trabajo entregado.`}
+            {vista.avance.desde &&
+              ` Arrancamos el ${new Date(vista.avance.desde).toLocaleDateString('es-AR', {
+                day: 'numeric',
+                month: 'long',
+              })}.`}
+          </p>
+
+          <div className="pista" style={{ marginBottom: 18 }}>
+            <div
+              className="lleno"
+              style={{
+                width: `${Math.max(2, vista.avance.avance)}%`,
+                background:
+                  vista.avance.avance === 100 ? 'var(--referente)' : 'var(--competitivo)',
+              }}
+            />
+          </div>
+
+          <ListaDeAvance titulo="Entregado" items={vista.avance.entregado} />
+          <ListaDeAvance titulo="En curso" items={vista.avance.enCurso} />
+          <ListaDeAvance titulo="Todavía no empezó" items={vista.avance.pendiente} />
+        </div>
+      )}
+
+      {/*
+       * Con trabajo entregado el cierre no puede seguir siendo una venta.
+       * El puntaje que se ve arriba es el del día de la auditoría y no cambia
+       * porque nadie volvió a medir —el sistema no da por cumplido lo que no
+       * verificó—, así que "está todo entregado" junto a un 28 se lee como una
+       * contradicción si no se explica que falta la medición nueva.
+       */}
+      {vista.avance ? (
+        <div className="cierre-doc">
+          <h2>{vista.avance.avance === 100 ? 'Qué sigue' : 'En qué estamos'}</h2>
+          <p>
+            {vista.avance.avance === 100 ? (
+              <>
+                El trabajo está entregado. El {vista.puntaje} que ves arriba es la medición del{' '}
+                {fecha}, de antes de empezar: no se mueve solo. {vista.auditadoPor} vuelve a medir el
+                negocio para mostrarte cómo quedó, con el mismo método y las mismas {' '}
+                {vista.dimensiones.length} dimensiones, así la comparación es contra lo mismo.
+              </>
+            ) : (
+              <>
+                Vamos {vista.avance.avance}% del trabajo acordado. El {vista.puntaje} de arriba es la
+                medición del {fecha}, de antes de arrancar. Cuando esté todo entregado,{' '}
+                {vista.auditadoPor} vuelve a medir para mostrarte cómo quedó.
+              </>
+            )}
+          </p>
+        </div>
+      ) : (
       <div className="cierre-doc">
         <h2>Cómo lo resolvemos</h2>
         <p>
@@ -137,6 +196,7 @@ export function Publico() {
           )}
         </p>
       </div>
+      )}
 
       <div className="pie-impresion solo-impresion">
         <span>
@@ -144,6 +204,24 @@ export function Publico() {
         </span>
         <span>{fecha}</span>
       </div>
+    </div>
+  );
+}
+
+/** Un grupo del avance. No se dibuja si está vacío: un título con nada abajo confunde. */
+function ListaDeAvance({ titulo, items }: { titulo: string; items: string[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 4 }}>{titulo}</div>
+      <ul style={{ margin: 0, paddingLeft: 20 }}>
+        {items.map((item) => (
+          <li key={item} style={{ fontSize: 14.5 }}>
+            {item}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

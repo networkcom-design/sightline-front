@@ -5,6 +5,7 @@ import { api, ErrorApi } from '../api/cliente';
 import type { Informe, ServicioSugerido } from '../api/tipos';
 import { EnviarPropuesta } from '../componentes/EnviarPropuesta';
 import { ComparativaDePuntaje, GraficoDimensiones, HallazgosPorImpacto } from '../componentes/Graficos';
+import { Seguimiento } from '../componentes/Seguimiento';
 import {
   ChipNivel,
   Medidor,
@@ -13,17 +14,68 @@ import {
   formatearPesos,
 } from '../componentes/Piezas';
 
+type Seccion = 'diagnostico' | 'propuesta' | 'seguimiento';
+
+/**
+ * Con qué pestaña abre el informe.
+ *
+ * Depende de en qué punto está el expediente: si ya hay trabajo contratado, lo
+ * que el auditor viene a hacer es actualizar tareas, no releer el diagnóstico.
+ */
+function seccionInicial(informe: Informe): Seccion {
+  if (informe.seguimiento) return 'seguimiento';
+  if (informe.estado === 'Enviada') return 'seguimiento';
+  return 'diagnostico';
+}
+
+function etiquetaDeSeguimiento(informe: Informe): string | undefined {
+  const s = informe.seguimiento;
+  if (!s) return undefined;
+  if (s.motivoRechazo) return 'no avanzó';
+  return `${s.avance}%`;
+}
+
+interface PestanaProps {
+  nombre: string;
+  detalle?: string;
+  activa: boolean;
+  onClic: () => void;
+}
+
+function Pestana({ nombre, detalle, activa, onClic }: PestanaProps) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={activa}
+      className={`pestana ${activa ? 'activa' : ''}`}
+      onClick={onClic}
+    >
+      {nombre}
+      {detalle && <small>{detalle}</small>}
+    </button>
+  );
+}
+
 export function InformePagina() {
   const { id = '' } = useParams();
   const [informe, setInforme] = useState<Informe | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [ajustando, setAjustando] = useState<string | null>(null);
+  const [seccion, setSeccion] = useState<Seccion | null>(null);
 
   useEffect(() => {
     api
       .informe(id)
-      .then(setInforme)
+      .then((datos) => {
+        setInforme(datos);
+        // La pestaña inicial se elige una sola vez, al cargar: si se
+        // recalculara con cada respuesta del servidor, aceptar la propuesta
+        // saltaría de pestaña sola y cambiar una tarea devolvería al auditor
+        // a donde el código cree que tiene que estar, no donde estaba mirando.
+        setSeccion((actual) => actual ?? seccionInicial(datos));
+      })
       .catch((e) => setError(e instanceof ErrorApi ? e.message : 'No se pudo cargar el informe.'));
   }, [id]);
 
@@ -42,9 +94,13 @@ export function InformePagina() {
   // Solo corta la página si nunca se pudo cargar. Un error al ajustar un precio
   // se muestra arriba sin hacer desaparecer el informe que el auditor está mirando.
   if (error && !informe) return <div className="aviso error">{error}</div>;
-  if (!informe) return <p className="cargando">Cargando informe...</p>;
+  if (!informe || !seccion) return <p className="cargando">Cargando informe...</p>;
 
   const enlacePublico = `${window.location.origin}/informe/${informe.tokenPublico}`;
+
+  // Con el trato cerrado el presupuesto no se toca: lo que se pactó vive en las
+  // tareas contratadas, con los precios congelados de ese día.
+  const cerrada = (informe.seguimiento?.tareas.length ?? 0) > 0;
 
   const copiarEnlace = async () => {
     await navigator.clipboard.writeText(enlacePublico);
@@ -83,12 +139,6 @@ export function InformePagina() {
 
       {error && <div className="aviso error">{error}</div>}
 
-      <EnviarPropuesta
-        auditoriaId={id}
-        bloqueado={informe.provisional}
-        onEnviada={() => void api.informe(id).then(setInforme)}
-      />
-
       {informe.provisional && (
         <div className="aviso atencion">
           <strong>Puntaje provisional.</strong> Faltan responder {informe.senalesPendientes} señales.
@@ -97,6 +147,32 @@ export function InformePagina() {
         </div>
       )}
 
+      <div className="pestanas solo-pantalla" role="tablist">
+        <Pestana
+          nombre="Diagnóstico"
+          detalle={`${informe.planDeAccion.length} hallazgos`}
+          activa={seccion === 'diagnostico'}
+          onClic={() => setSeccion('diagnostico')}
+        />
+        <Pestana
+          nombre="Propuesta"
+          detalle={
+            informe.propuesta.servicios.length > 0
+              ? `${informe.propuesta.servicios.filter((s) => s.incluido).length} servicios`
+              : undefined
+          }
+          activa={seccion === 'propuesta'}
+          onClic={() => setSeccion('propuesta')}
+        />
+        <Pestana
+          nombre="Seguimiento"
+          detalle={etiquetaDeSeguimiento(informe)}
+          activa={seccion === 'seguimiento'}
+          onClic={() => setSeccion('seguimiento')}
+        />
+      </div>
+
+      <section className={seccion === 'diagnostico' ? undefined : 'seccion-oculta'}>
       <div className="tarjeta">
         <div className="puntaje-bloque">
           <div>
@@ -184,7 +260,9 @@ export function InformePagina() {
           </>
         )}
       </div>
+      </section>
 
+      <section className={seccion === 'propuesta' ? undefined : 'seccion-oculta'}>
       <div className="tarjeta">
         <h2>Propuesta</h2>
 
@@ -215,14 +293,24 @@ export function InformePagina() {
                 key={s.codigo}
                 servicio={s}
                 guardando={ajustando === s.codigo}
+                cerrada={cerrada}
                 onAjustar={(incluido, precio) => ajustar(s.codigo, incluido, precio)}
               />
             ))}
 
             <p className="ayuda solo-pantalla" style={{ marginTop: 4 }}>
-              Destildá lo que el cliente no quiera o cambiale el precio: los totales, el plazo y las
-              proyecciones se recalculan solos. Los ajustes son de esta propuesta y no tocan tu lista
-              de precios.
+              {cerrada ? (
+                <>
+                  El cliente ya aceptó, así que el presupuesto quedó congelado con los precios de ese
+                  día. Lo que se está ejecutando figura arriba, en el trabajo contratado.
+                </>
+              ) : (
+                <>
+                  Destildá lo que el cliente no quiera o cambiale el precio: los totales, el plazo y
+                  las proyecciones se recalculan solos. Los ajustes son de esta propuesta y no tocan
+                  tu lista de precios.
+                </>
+              )}
             </p>
 
             <div className="tiles" style={{ marginTop: 16, marginBottom: 0 }}>
@@ -246,6 +334,17 @@ export function InformePagina() {
           </>
         )}
       </div>
+
+      <EnviarPropuesta
+        auditoriaId={id}
+        bloqueado={informe.provisional}
+        onEnviada={() => void api.informe(id).then(setInforme)}
+      />
+      </section>
+
+      <section className={seccion === 'seguimiento' ? undefined : 'seccion-oculta'}>
+        <Seguimiento informe={informe} onCambio={setInforme} />
+      </section>
     </>
   );
 }
@@ -253,6 +352,8 @@ export function InformePagina() {
 interface LineaProps {
   servicio: ServicioSugerido;
   guardando: boolean;
+  /** El cliente ya aceptó: los precios quedaron pactados y no se editan más. */
+  cerrada: boolean;
   onAjustar: (incluido: boolean, precio: number | null) => void;
 }
 
@@ -263,7 +364,7 @@ interface LineaProps {
  * guardado recalcula el informe entero del lado del servidor, y hacerlo por
  * cada dígito tecleado sería una consulta por letra.
  */
-function LineaDeServicio({ servicio, guardando, onAjustar }: LineaProps) {
+function LineaDeServicio({ servicio, guardando, cerrada, onAjustar }: LineaProps) {
   const [precio, setPrecio] = useState(String(servicio.precio));
 
   useEffect(() => {
@@ -295,7 +396,7 @@ function LineaDeServicio({ servicio, guardando, onAjustar }: LineaProps) {
           type="checkbox"
           className="solo-pantalla"
           checked={servicio.incluido}
-          disabled={guardando}
+          disabled={guardando || cerrada}
           onChange={(e) =>
             onAjustar(e.target.checked, servicio.precioAjustado ? servicio.precio : null)
           }
@@ -323,7 +424,7 @@ function LineaDeServicio({ servicio, guardando, onAjustar }: LineaProps) {
             type="text"
             inputMode="numeric"
             value={precio}
-            disabled={guardando || !servicio.incluido}
+            disabled={guardando || cerrada || !servicio.incluido}
             onChange={(e) => setPrecio(e.target.value)}
             onBlur={confirmarPrecio}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
@@ -334,7 +435,7 @@ function LineaDeServicio({ servicio, guardando, onAjustar }: LineaProps) {
 
         <small>
           {servicio.modalidad === 'MENSUAL' ? 'por mes' : `único · ${servicio.plazoDias} días`}
-          {servicio.precioAjustado && (
+          {servicio.precioAjustado && !cerrada && (
             <>
               {' · '}
               <button

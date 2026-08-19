@@ -5,6 +5,21 @@ import { api, ErrorApi } from '../api/cliente';
 import type { Resumen } from '../api/tipos';
 import { ChipNivel } from '../componentes/Piezas';
 
+/**
+ * El color del estado.
+ *
+ * Solo se destacan los dos finales —cerrado y perdido—, que son los que se
+ * buscan de un vistazo en una lista larga. Pintar los siete haría que ninguno
+ * resalte, que es lo mismo que no pintar ninguno.
+ */
+const CLASE_POR_ESTADO: Record<string, string> = {
+  Entregada: 'referente',
+  'En ejecución': 'competitivo',
+  Rechazada: 'critico',
+};
+
+const CON_TRABAJO = ['Aceptada', 'En ejecución', 'Entregada'];
+
 export function Panel() {
   const navegar = useNavigate();
   const [auditorias, setAuditorias] = useState<Resumen[] | null>(null);
@@ -58,7 +73,8 @@ export function Panel() {
                   <th>Rubro</th>
                   <th className="num">Puntaje</th>
                   <th>Nivel</th>
-                  <th className="num">Avance</th>
+                  <th className="num">Señales</th>
+                  <th className="num">Trabajo</th>
                   <th>Estado</th>
                 </tr>
               </thead>
@@ -78,8 +94,15 @@ export function Panel() {
                     <td className="num" style={{ color: 'var(--muted)' }}>
                       {a.senalesRespondidas}/{a.senalesTotales}
                     </td>
+                    {/* Vacío y no "0%" cuando no hay nada contratado: un cero
+                        se lee como "arrancó y no avanzó", que es otra cosa. */}
+                    <td className="num" style={{ color: 'var(--muted)' }}>
+                      {CON_TRABAJO.includes(a.estado) ? `${a.avance}%` : '—'}
+                    </td>
                     <td>
-                      <span className="chip neutro">{a.estado}</span>
+                      <span className={`chip ${CLASE_POR_ESTADO[a.estado] ?? 'neutro'}`}>
+                        {a.estado}
+                      </span>
                     </td>
                   </tr>
                 ))}

@@ -896,6 +896,59 @@ tr:last-child td {
   color: var(--competitivo);
 }
 
+/* ---- Pestañas del informe ----
+   El informe tiene tres cosas distintas adentro: el diagnóstico, lo que se
+   cotiza y lo que se está ejecutando. Apiladas en una sola columna suman más
+   de cuatro pantallas y el auditor termina buscando a ciegas, así que se
+   separan. Al imprimir se muestran todas: el PDF tiene que traer el informe
+   completo, no la pestaña que quedó abierta. */
+
+.pestanas {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+
+.pestana {
+  padding: 9px 15px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.pestana:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.pestana:disabled {
+  color: var(--faint);
+  cursor: not-allowed;
+}
+
+.pestana.activa {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 500;
+}
+
+.pestana small {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
+  margin-left: 7px;
+}
+
+.seccion-oculta {
+  display: none;
+}
+
 /* ---- Estado, par validado ----
    Rojo y verde solo se usan para este juicio binario, nunca para distinguir
    categorías: la escala de cuatro niveles usa una rampa de un solo tono porque
@@ -980,10 +1033,16 @@ tr:last-child td {
   .lateral,
   .acciones,
   .pasos,
+  .pestanas,
   .boton,
   .tri,
   .aviso.atencion {
     display: none !important;
+  }
+
+  /* El PDF trae el informe entero, no la pestaña que quedó abierta. */
+  .seccion-oculta {
+    display: block;
   }
 
   .solo-pantalla {

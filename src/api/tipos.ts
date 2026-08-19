@@ -107,6 +107,37 @@ export interface Propuesta {
   aporteDelAbono: number;
 }
 
+export type EstadoTarea = 'PENDIENTE' | 'EN_CURSO' | 'COMPLETADA';
+
+export interface TareaEnCurso {
+  codigoServicio: string;
+  nombre: string;
+  /** El precio congelado el día que el cliente aceptó, no el de lista de hoy. */
+  precio: number;
+  modalidad: 'UNICO' | 'MENSUAL';
+  plazoDias: number;
+  estado: EstadoTarea;
+  /** Cómo se lee ese estado según la modalidad: un abono "activo", un trabajo "entregado". */
+  estadoEtiqueta: string;
+  /** Los tres estados con su nombre. Vienen del backend para no repetir la traducción acá. */
+  opciones: { estado: EstadoTarea; etiqueta: string }[];
+  cumplida: boolean;
+  iniciadaEn: string | null;
+  completadaEn: string | null;
+  nota: string | null;
+}
+
+export interface Seguimiento {
+  tareas: TareaEnCurso[];
+  avance: number;
+  totalUnicoContratado: number;
+  totalMensualContratado: number;
+  aceptadaEn: string | null;
+  rechazadaEn: string | null;
+  motivoRechazo: string | null;
+  entregadaEn: string | null;
+}
+
 export interface Informe {
   id: string;
   nombre: string;
@@ -131,6 +162,8 @@ export interface Informe {
   cobertura: number;
   provisional: boolean;
   propuesta: Propuesta;
+  /** Lo contratado y su avance. Null mientras el cliente no respondió. */
+  seguimiento: Seguimiento | null;
   /** Por qué el análisis con IA no completó todo. Nulo si salió bien. */
   avisoDelAnalisis: string | null;
 }
@@ -146,6 +179,8 @@ export interface Resumen {
   senalesRespondidas: number;
   senalesTotales: number;
   creadaEn: string;
+  /** Cuánto del trabajo contratado está entregado. Cero si no hay trato cerrado. */
+  avance: number;
 }
 
 export interface MensajeParaEnviar {
@@ -180,4 +215,15 @@ export interface VistaPublica {
   puntajeSostenido: number;
   plazoDiasEstimado: number;
   auditadoPor: string;
+  /** El avance del trabajo. Null mientras no haya nada contratado. */
+  avance: AvancePublico | null;
+}
+
+/** Lo que el comercio ve de su propio trabajo en marcha. Sin precios. */
+export interface AvancePublico {
+  entregado: string[];
+  enCurso: string[];
+  pendiente: string[];
+  avance: number;
+  desde: string | null;
 }

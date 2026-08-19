@@ -1,4 +1,5 @@
 import type {
+  EstadoTarea,
   Informe,
   MensajeParaEnviar,
   RespuestaAutenticacion,
@@ -147,6 +148,22 @@ export const api = {
     pedir<MensajeParaEnviar>(
       `/api/auditorias/${id}/mensaje?canal=${canal}&origen=${encodeURIComponent(origen)}`,
     ),
+
+  /** El cliente aceptó: congela el presupuesto y crea las tareas a seguir. */
+  aceptarPropuesta: (id: string) =>
+    pedir<Informe>(`/api/auditorias/${id}/propuesta/aceptar`, { metodo: 'POST' }),
+
+  rechazarPropuesta: (id: string, motivo: string) =>
+    pedir<Informe>(`/api/auditorias/${id}/propuesta/rechazar`, {
+      metodo: 'POST',
+      cuerpo: { motivo },
+    }),
+
+  cambiarEstadoDeTarea: (id: string, codigo: string, estado: EstadoTarea, nota: string | null) =>
+    pedir<Informe>(`/api/auditorias/${id}/tareas/${codigo}`, {
+      metodo: 'PUT',
+      cuerpo: { estado, nota },
+    }),
 
   marcarEnviada: (id: string) =>
     pedir<Informe>(`/api/auditorias/${id}/enviada`, { metodo: 'POST' }),
